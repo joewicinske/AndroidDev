@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * This branch is not containing the view pager. A new branch will be made for that once we have implemented the view pager. 
+ * RecyclerView Branch 
  */
 public class MainActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
 
