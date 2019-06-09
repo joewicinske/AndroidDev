@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Testing committ to new brach
+ */
 public class MainActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
 
     private EditText fastingInput, breakfastInput, lunchInput, dinnerInput, notesInput;
