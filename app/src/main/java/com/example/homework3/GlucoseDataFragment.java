@@ -3,6 +3,7 @@ package com.example.homework3;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,7 +29,8 @@ public class GlucoseDataFragment extends Fragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private List<GlucoseData> glucoseData = DummyContent.ITEMS;
-    private MyGlucoseDataRecyclerViewAdapter adapter = new MyGlucoseDataRecyclerViewAdapter(glucoseData, mListener);;
+    private CustomPageAdapter adapter;
+    //private MyGlucoseDataRecyclerViewAdapter adapter = new MyGlucoseDataRecyclerViewAdapter(glucoseData, mListener);;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -60,30 +62,21 @@ public class GlucoseDataFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_glucosedata_list, container, false);
-
+        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-
-            recyclerView.setAdapter(adapter);
-        }
+        Context context = view.getContext();
+        adapter = new CustomPageAdapter(context, glucoseData );
+        if (glucoseData.size() > 3) adapter.notifyDataSetChanged();
+        viewPager.setAdapter(adapter);
         return view;
     }
 
     public void updateList(GlucoseData data){
         glucoseData.add(data);
-        adapter.notifyDataSetChanged();
+        if (adapter != null) adapter.notifyDataSetChanged();
     }
 
-    public MyGlucoseDataRecyclerViewAdapter getAdapter() {
-        return adapter;
-    }
+
     public List<GlucoseData> getList(){
         return glucoseData;
     }
@@ -102,6 +95,11 @@ public class GlucoseDataFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void setData(List<GlucoseData> dataList) {
+        glucoseData = dataList;
+
     }
 
     /**

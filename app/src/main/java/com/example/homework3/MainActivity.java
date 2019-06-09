@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Testing committ to new brach
+ * View Pager Addition . V1.1
  */
 public class MainActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
 
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
                 cal.set(Calendar.YEAR, year);
                 cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 cal.set(Calendar.MONTH, month);
-                dateLabel.setText(getDateLabelTxt(cal.getTime()));
+                dateLabel.setText(GlucoseData.getDateLabelTxt(cal.getTime()));
             }
         };
 
@@ -221,13 +221,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         clearInputs();
     }
 
-    public static String getDateLabelTxt(Date myDate) {
-        String pattern = "MMM dd, yyyy";
-        SimpleDateFormat simpleDateFormat =
-                new SimpleDateFormat(pattern, new Locale("en", "US"));
-        String date = simpleDateFormat.format(myDate);
-        return date;
-    }
+
 
     private void clearInputs() {
         resultsView.setText("");
@@ -243,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     private void getHistory(){
         FragmentManager fragMan = getSupportFragmentManager();
         FragmentTransaction fragTransaction = fragMan.beginTransaction();
+        myFrag.setData(dataList);
         fragTransaction.replace(R.id.sample_content_fragment, myFrag);
         fragTransaction.commit();
     }
@@ -262,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
             System.err.println("List is nlull");
         }else{
             myFrag.updateList(item);
+
             getHistory();
         }
 

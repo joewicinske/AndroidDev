@@ -53,7 +53,7 @@ public class DummyContent {
         Calendar cal = Calendar.getInstance();
         cal.setTime(entryDate); // your date (java.util.Date)
         cal.add(Calendar.MONTH, monthNum); // You can -/+ x months here to go back in history or move forward.
-        glucoseDataItem.setEntryDate(MainActivity.getDateLabelTxt(cal.getTime()));
+        glucoseDataItem.setEntryDate(GlucoseData.getDateLabelTxt(cal.getTime()));
         return glucoseDataItem;
     }
 

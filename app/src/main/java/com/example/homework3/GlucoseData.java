@@ -1,5 +1,9 @@
 package com.example.homework3;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class GlucoseData {
     String entryDate; //
     int fasting;
@@ -83,5 +87,13 @@ public class GlucoseData {
 
     public void setNormal(boolean normal) {
         isNormal = normal;
+    }
+
+    public static String getDateLabelTxt(Date myDate) {
+        String pattern = "MMM dd, yyyy";
+        SimpleDateFormat simpleDateFormat =
+                new SimpleDateFormat(pattern, new Locale("en", "US"));
+        String date = simpleDateFormat.format(myDate);
+        return date;
     }
 }
