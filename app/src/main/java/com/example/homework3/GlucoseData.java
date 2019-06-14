@@ -7,6 +7,8 @@ import java.util.Locale;
 public class GlucoseData {
     String entryDate; //
     int fasting;
+    String notes = "";
+    int id;
 
     public GlucoseData(int fasting, int breakfast, int lunch, int dinner) {
         this.fasting = fasting;
@@ -19,7 +21,7 @@ public class GlucoseData {
     int dinner;
     int lunch;
     int average;
-    int id;
+
     boolean isNormal;
 
     public GlucoseData(){
@@ -95,5 +97,13 @@ public class GlucoseData {
                 new SimpleDateFormat(pattern, new Locale("en", "US"));
         String date = simpleDateFormat.format(myDate);
         return date;
+    }
+
+    public void setNotes(String notes){
+        this.notes = notes;
+    }
+
+    public String getNotes(){
+        return this.notes;
     }
 }
