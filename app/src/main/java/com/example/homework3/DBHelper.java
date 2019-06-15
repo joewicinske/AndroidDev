@@ -20,9 +20,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GLUCOSE_COLUMN_ENTRY_DATE = "entryDate";
     public static final String GLUCOSE_COLUMN_ID = "id";
     public static final String GLUCOSE_COLUMN_NOTES = "notes";
+    private final SQLiteDatabase writableDatabase = this.getWritableDatabase();
+    private final SQLiteDatabase readableDatabase = this.getReadableDatabase();
 
     public DBHelper(Context context){
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, 2);
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -37,7 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void insertGlucose(GlucoseData glucoseData){
         ContentValues contentValues = new ContentValues();
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = writableDatabase;
         contentValues.put(GLUCOSE_COLUMN_BREAKFAST, glucoseData.getBreakfast());
         contentValues.put(GLUCOSE_COLUMN_LUNCH, glucoseData.getLunch());
         contentValues.put(GLUCOSE_COLUMN_NOTES, glucoseData.getNotes());
@@ -45,22 +47,34 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(GLUCOSE_COLUMN_FASTING, glucoseData.getFasting());
         contentValues.put(GLUCOSE_COLUMN_ENTRY_DATE, glucoseData.getEntryDate());
         db.insert("glucose", null, contentValues);
+        //this.getWritableDatabase().endTransaction();
+        //writableDatabase.close();
     }
 
     public int getNumRows(){
-        SQLiteDatabase db = this.getReadableDatabase();
-        return (int) DatabaseUtils.queryNumEntries(db, "glucose");
+        SQLiteDatabase db = readableDatabase;
+        int rows  =(int) DatabaseUtils.queryNumEntries(db, "glucose");
+        //this.getReadableDatabase().endTransaction();
+        readableDatabase.close();
+        return rows;
+    }
+
+    public void deleteAll(){
+        writableDatabase.execSQL("DELETE FROM glucose");
+        //this.getWritableDatabase().endTransaction();
+        //writableDatabase.close();
     }
 
     public void deleteGlucose(int id ){
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete("glucose", "id = ?", new String[]{String.valueOf(id)});
+        writableDatabase.delete("glucose", "id = ?", new String[]{String.valueOf(id)});
+       // this.getWritableDatabase().endTransaction();
+        //writableDatabase.close();
 
     }
 
     public ArrayList<GlucoseData> getAllData(){
         ArrayList<GlucoseData> data = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = readableDatabase;
         Cursor c = db.rawQuery("select * from glucose", null);
         c.moveToFirst();
         while (c.isAfterLast() == false){
@@ -75,6 +89,8 @@ public class DBHelper extends SQLiteOpenHelper {
             data.add(glucoseData);
             c.moveToNext();
         }
+        readableDatabase.close();
+
         return data;
     }
 

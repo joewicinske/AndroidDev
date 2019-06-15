@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +29,9 @@ public class GlucoseDataFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
-    private List<GlucoseData> glucoseData = DummyContent.ITEMS;
+    private List<GlucoseData> glucoseData;
     private CustomPageAdapter adapter;
+    private Context context;
     //private MyGlucoseDataRecyclerViewAdapter adapter = new MyGlucoseDataRecyclerViewAdapter(glucoseData, mListener);;
 
     /**
@@ -64,16 +66,21 @@ public class GlucoseDataFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_glucosedata_list, container, false);
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
         // Set the adapter
-        Context context = view.getContext();
+        context = view.getContext();
+        glucoseData = (new DBHelper(context)).getAllData();
         adapter = new CustomPageAdapter(context, glucoseData );
-        if (glucoseData.size() > 3) adapter.notifyDataSetChanged();
         viewPager.setAdapter(adapter);
         return view;
     }
 
-    public void updateList(GlucoseData data){
-        glucoseData.add(data);
-        if (adapter != null) adapter.notifyDataSetChanged();
+    public void updateList(){
+        glucoseData = (new DBHelper(context)).getAllData();
+        Log.d(this.getClass().getSimpleName(),"List has been updated");
+        if (adapter != null){
+            adapter.notifyDataSetChanged();
+            Log.d(this.getClass().getSimpleName(),"List has been notified");
+
+        }
     }
 
 
@@ -96,12 +103,6 @@ public class GlucoseDataFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    public void setData(List<GlucoseData> dataList) {
-        glucoseData = dataList;
-
-    }
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

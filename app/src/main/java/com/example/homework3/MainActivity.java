@@ -34,15 +34,17 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     private TextView resultsView, dateLabel;
     private Button clearButton, historyButton, submitButton;
     private CheckBox normalCheckBox;
-    private List<GlucoseData> dataList = DummyContent.ITEMS;
+    private DBHelper dbHelper;
     private GlucoseDataFragment myFrag = new GlucoseDataFragment();
     private String[] notes = new String[] {"", "", "", ""};
     private DatePickerDialog.OnDateSetListener dateSetListener;
+    private String TAG = this.getClass().getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dbHelper = new DBHelper(this);
         initializeViews();
     }
 
@@ -210,13 +212,12 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         int dinnerNum = Integer.parseInt(dinnerText);
 
         GlucoseData glucoseData = new GlucoseData();
-        glucoseData.setId(dataList.size());
         glucoseData.setBreakfast(breakfastNum);
         glucoseData.setLunch(lunchNum);
         glucoseData.setDinner(dinnerNum);
         glucoseData.setFasting(fastingNum);
         glucoseData.setEntryDate(entryDateText);
-       // dataList.add(glucoseData);
+        if (dbHelper.getNumRows() > 3)dbHelper.deleteAll();
         onListFragmentInteraction(glucoseData);
         clearInputs();
     }
@@ -237,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     private void getHistory(){
         FragmentManager fragMan = getSupportFragmentManager();
         FragmentTransaction fragTransaction = fragMan.beginTransaction();
-        myFrag.setData(dataList);
         fragTransaction.replace(R.id.sample_content_fragment, myFrag);
         fragTransaction.commit();
     }
@@ -250,14 +250,13 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
 
     @Override
     public void onListFragmentInteraction(GlucoseData item) {
-        //dataList.add(item);
         if (item == null){
             System.err.println("Item is nlull");
-        }else if (myFrag.getList() == null){
-            System.err.println("List is nlull");
         }else{
-            myFrag.updateList(item);
-
+            dbHelper.insertGlucose(item);
+            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. Size is now " + dbHelper.getNumRows());
+            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. List is now" + dbHelper.getAllData());
+            myFrag.updateList();
             getHistory();
         }
 

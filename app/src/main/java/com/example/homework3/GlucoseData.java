@@ -106,4 +106,19 @@ public class GlucoseData {
     public String getNotes(){
         return this.notes;
     }
+
+    @Override
+    public String toString() {
+        return "GlucoseData{" +
+                "entryDate='" + entryDate + '\'' +
+                ", fasting=" + fasting +
+                ", notes='" + notes + '\'' +
+                ", id=" + id +
+                ", breakfast=" + breakfast +
+                ", dinner=" + dinner +
+                ", lunch=" + lunch +
+                ", average=" + average +
+                ", isNormal=" + isNormal +
+                '}';
+    }
 }
