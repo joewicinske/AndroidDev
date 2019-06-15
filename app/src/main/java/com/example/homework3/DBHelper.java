@@ -9,7 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-
+/**
+Does all the dB transactions 
+*/
 public class DBHelper extends SQLiteOpenHelper {
     //breakfast, lunch, dinner, fasting, entry date, notes
     public static final String DATABASE_NAME = "GlucoseDb.db";
