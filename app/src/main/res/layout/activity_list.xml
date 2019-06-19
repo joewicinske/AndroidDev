@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/addToolBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        style="@style/HeaderBar"
+        app:theme="@style/Theme.AppCompat"
+        app:popupTheme="@style/Theme.AppCompat"
+        android:elevation="4dp"
+        />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerListView"
+        android:name="com.example.homework3.ListActivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        tools:context=".ListActivity"
+        tools:listitem="@layout/fragment_glucosedata" >
+    </android.support.v7.widget.RecyclerView>
+</LinearLayout>

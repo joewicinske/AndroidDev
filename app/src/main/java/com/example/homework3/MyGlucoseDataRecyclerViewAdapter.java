@@ -19,11 +19,10 @@ import java.util.List;
 public class MyGlucoseDataRecyclerViewAdapter extends RecyclerView.Adapter<MyGlucoseDataRecyclerViewAdapter.ViewHolder> {
 
     private final List<GlucoseData> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    private ItemClickListener mClickListener;
 
-    public MyGlucoseDataRecyclerViewAdapter(List<GlucoseData> items, OnListFragmentInteractionListener listener) {
+    public MyGlucoseDataRecyclerViewAdapter(List<GlucoseData> items) {
         mValues = items;
-        mListener = listener;
     }
 
     @Override
@@ -39,16 +38,7 @@ public class MyGlucoseDataRecyclerViewAdapter extends RecyclerView.Adapter<MyGlu
         holder.entryDateView.setText(mValues.get(position).getEntryDate());
         holder.averageGlucoseView.setText(String.valueOf(mValues.get(position).getAverage()));
         holder.isNormalView.setChecked(mValues.get(position).isNormal());
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    //mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+
     }
 
     @Override
@@ -56,7 +46,7 @@ public class MyGlucoseDataRecyclerViewAdapter extends RecyclerView.Adapter<MyGlu
         return mValues.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final View mView;
         public final TextView averageGlucoseView;
         public final TextView entryDateView;
@@ -69,11 +59,30 @@ public class MyGlucoseDataRecyclerViewAdapter extends RecyclerView.Adapter<MyGlu
             entryDateView = (TextView) view.findViewById(R.id.entryDateItem);
             averageGlucoseView = (TextView) view.findViewById(R.id.averageGlucoseItem);
             isNormalView = (CheckBox) view.findViewById(R.id.normalCheckBoxItem);
+            mView.setOnClickListener(this);
         }
 
         @Override
         public String toString() {
             return super.toString() + " '" + averageGlucoseView.getText() + "'";
         }
+
+
+        @Override
+        public void onClick(View v) {
+            if (mClickListener != null) mClickListener.onItemClick(v, getAdapterPosition());
+        }
     }
+
+
+    // allows clicks events to be caught
+    void setClickListener(ItemClickListener itemClickListener) {
+        mClickListener = itemClickListener;
+    }
+        // parent activity will implement this method to respond to click events
+        public interface ItemClickListener {
+            void onItemClick(View view, int position);
+        }
+
+
 }

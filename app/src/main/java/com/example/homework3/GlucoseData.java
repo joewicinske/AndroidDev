@@ -1,10 +1,11 @@
 package com.example.homework3;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class GlucoseData {
+public class GlucoseData implements Serializable {
     String entryDate; //
     int fasting;
     String notes = "";

@@ -32,6 +32,7 @@ public class GlucoseDataFragment extends Fragment {
     private List<GlucoseData> glucoseData;
     private CustomPageAdapter adapter;
     private Context context;
+    private DBHelper dbHelper;
     //private MyGlucoseDataRecyclerViewAdapter adapter = new MyGlucoseDataRecyclerViewAdapter(glucoseData, mListener);;
 
     /**
@@ -67,14 +68,14 @@ public class GlucoseDataFragment extends Fragment {
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
         // Set the adapter
         context = view.getContext();
-        glucoseData = (new DBHelper(context)).getAllData();
+        glucoseData = dbHelper.getAllData();
         adapter = new CustomPageAdapter(context, glucoseData );
         viewPager.setAdapter(adapter);
         return view;
     }
 
     public void updateList(){
-        glucoseData = (new DBHelper(context)).getAllData();
+        glucoseData = dbHelper.getAllData();
         Log.d(this.getClass().getSimpleName(),"List has been updated");
         if (adapter != null){
             adapter.notifyDataSetChanged();

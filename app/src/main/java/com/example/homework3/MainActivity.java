@@ -1,6 +1,7 @@
 package com.example.homework3;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.FragmentManager;
@@ -8,13 +9,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.homework3.dummy.DummyContent;
 
@@ -39,13 +44,52 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     private String[] notes = new String[] {"", "", "", ""};
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private String TAG = this.getClass().getSimpleName();
+    private String addTitle = "Add Glucose Information";
+    private String deleteTitle = "Delete Glucose Information";
+    private Toolbar mTopToolbar;
+    private boolean deleteData = false;
+    private Bundle b;
+    private GlucoseData incomingGlucoseData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dbHelper = new DBHelper(this);
+        b = getIntent().getExtras();
+        if ( b != null) {
+            Object obj = b.getSerializable("glucoseItem");
+            if (obj != null){
+                incomingGlucoseData = (GlucoseData) obj;
+                deleteData = true;
+            }else {
+                deleteData = false;
+                Log.e(getClass().getName(), "Error in receiving object");
+            }
+        }else {
+            // assume we are just adding a blank glucuose Item
+            deleteData = false;
+        }
+        mTopToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(mTopToolbar);
+        getSupportActionBar().setTitle(deleteData ? deleteTitle : addTitle);
         initializeViews();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (deleteData && item.getItemId() == R.id.delete) {
+            dbHelper.deleteGlucose(incomingGlucoseData.getId());
+            Toast.makeText(this, "Item has been deleted", Toast.LENGTH_SHORT).show();
+            getHistory();
+        }
+            return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (deleteData) getMenuInflater().inflate(R.menu.menu_delete, menu);
+        return true;
     }
 
     private void initializeViews() {
@@ -162,9 +206,27 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
                 }
             }
         };
-        clearButton.setOnClickListener(listener);
-        historyButton.setOnClickListener(listener);
-        submitButton.setOnClickListener(listener);
+
+        if (deleteData) {
+            breakfastInput.setEnabled(false);
+            dinnerInput.setEnabled(false);
+            lunchInput.setEnabled(false);
+            fastingInput.setEnabled(false);
+            notesInput.setEnabled(false);
+            dateLabel.setEnabled(false);
+            breakfastInput.setText(String.valueOf(incomingGlucoseData.getBreakfast()));
+            fastingInput.setText(String.valueOf(incomingGlucoseData.getFasting()));
+            lunchInput.setText(String.valueOf(incomingGlucoseData.getLunch()));
+            dinnerInput.setText(String.valueOf(incomingGlucoseData.getDinner()));
+            notesInput.setText(String.valueOf(incomingGlucoseData.getNotes()));
+            dateLabel.setText(incomingGlucoseData.getEntryDate());
+            normalCheckBox.setChecked(incomingGlucoseData.isNormal());
+            submitButton.setVisibility(View.GONE);
+        }else {
+            clearButton.setOnClickListener(listener);
+            historyButton.setOnClickListener(listener);
+            submitButton.setOnClickListener(listener);
+        }
 
     }
 
@@ -206,6 +268,10 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         String dinnerText = dinnerInput.getText().toString();
         String notesText = notesInput.getText().toString();
         String entryDateText = dateLabel.getText().toString();
+        if (fastingText.isEmpty() || breakfastText.isEmpty() || lunchText.isEmpty() || entryDateText.isEmpty() || dinnerText.isEmpty()){
+            Toast.makeText(this, "Please fill in all the data. Only Notes can be left empty.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         int fastingNum = Integer.parseInt(fastingText);
         int breakfastNum = Integer.parseInt(breakfastText);
         int lunchNum = Integer.parseInt(lunchText);
@@ -217,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         glucoseData.setDinner(dinnerNum);
         glucoseData.setFasting(fastingNum);
         glucoseData.setEntryDate(entryDateText);
-        if (dbHelper.getNumRows() > 3)dbHelper.deleteAll();
+        glucoseData.setNotes(notesText);
         onListFragmentInteraction(glucoseData);
         clearInputs();
     }
@@ -236,10 +302,8 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     }
 
     private void getHistory(){
-        FragmentManager fragMan = getSupportFragmentManager();
-        FragmentTransaction fragTransaction = fragMan.beginTransaction();
-        fragTransaction.replace(R.id.sample_content_fragment, myFrag);
-        fragTransaction.commit();
+        Intent intent = new Intent(getApplicationContext(), ListActivity.class);
+        startActivity(intent);
     }
     /**
      * Accepts the edit text input and allows us to proceed to the next activity or fragment
