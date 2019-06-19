@@ -1,12 +1,15 @@
 package com.example.homework3;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class GlucoseData {
+public class GlucoseData implements Serializable {
     String entryDate; //
     int fasting;
+    String notes = "";
+    int id;
 
     public GlucoseData(int fasting, int breakfast, int lunch, int dinner) {
         this.fasting = fasting;
@@ -19,7 +22,7 @@ public class GlucoseData {
     int dinner;
     int lunch;
     int average;
-    int id;
+
     boolean isNormal;
 
     public GlucoseData(){
@@ -95,5 +98,28 @@ public class GlucoseData {
                 new SimpleDateFormat(pattern, new Locale("en", "US"));
         String date = simpleDateFormat.format(myDate);
         return date;
+    }
+
+    public void setNotes(String notes){
+        this.notes = notes;
+    }
+
+    public String getNotes(){
+        return this.notes;
+    }
+
+    @Override
+    public String toString() {
+        return "GlucoseData{" +
+                "entryDate='" + entryDate + '\'' +
+                ", fasting=" + fasting +
+                ", notes='" + notes + '\'' +
+                ", id=" + id +
+                ", breakfast=" + breakfast +
+                ", dinner=" + dinner +
+                ", lunch=" + lunch +
+                ", average=" + average +
+                ", isNormal=" + isNormal +
+                '}';
     }
 }
