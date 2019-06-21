@@ -4,9 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -21,19 +19,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.homework3.dummy.DummyContent;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * View Pager Addition . V1.1
  */
-public class MainActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
+public class AddModifyGlucoseActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
 
     private EditText fastingInput, breakfastInput, lunchInput, dinnerInput, notesInput;
     private TextView resultsView, dateLabel;
@@ -82,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
             dbHelper.deleteGlucose(incomingGlucoseData.getId());
             Toast.makeText(this, "Item has been deleted", Toast.LENGTH_SHORT).show();
             getHistory();
+        } else if (deleteData && item.getItemId() == R.id.upload){
+            Toast.makeText(this, "Item has been uploaded", Toast.LENGTH_SHORT).show();
         }
             return super.onOptionsItemSelected(item);
     }
@@ -181,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
                 int month = cal.get(Calendar.MONTH);
 
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, android.R.style.Theme_Black, dateSetListener, year, month ,day);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(AddModifyGlucoseActivity.this, android.R.style.Theme_Black, dateSetListener, year, month ,day);
                 datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 datePickerDialog.show();
             }
@@ -231,7 +224,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     }
 
     private String evaluateResult(String s, int glucoseLevel) {
-        String finalResult;
         if (glucoseLevel < 70){
             return String.format("[%s] HYPOGLYCEMIC", s);
         }else if(glucoseLevel >= 70 && glucoseLevel < 100){
@@ -289,7 +281,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     }
 
 
-
     private void clearInputs() {
         resultsView.setText("");
         fastingInput.setText("");
@@ -305,12 +296,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         Intent intent = new Intent(getApplicationContext(), ListActivity.class);
         startActivity(intent);
     }
-    /**
-     * Accepts the edit text input and allows us to proceed to the next activity or fragment
-     */
-    private void processInput(){
-
-    }
 
     @Override
     public void onListFragmentInteraction(GlucoseData item) {
@@ -318,11 +303,31 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
             System.err.println("Item is nlull");
         }else{
             dbHelper.insertGlucose(item);
-            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. Size is now " + dbHelper.getNumRows());
-            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. List is now" + dbHelper.getAllData());
             myFrag.updateList();
             getHistory();
         }
 
     }
+
+
+    private class AsyncNetworkTask extends AsyncTask<GlucoseData, Void, String> {
+
+        // url http://u.arizona.edu/~lxu/cscv381/local_glucose.php
+        @Override
+        protected String doInBackground(GlucoseData... dataItem) {
+            GlucoseData item = dataItem [0];
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+
 }

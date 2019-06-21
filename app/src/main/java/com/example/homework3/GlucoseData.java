@@ -11,6 +11,8 @@ public class GlucoseData implements Serializable {
     String notes = "";
     int id;
 
+    private String url;
+
     public GlucoseData(int fasting, int breakfast, int lunch, int dinner) {
         this.fasting = fasting;
         this.breakfast = breakfast;
@@ -106,6 +108,14 @@ public class GlucoseData implements Serializable {
 
     public String getNotes(){
         return this.notes;
+    }
+
+    public void setURL(String url){
+        this.url = url;
+    }
+
+    public String getURL(){
+        return this.url;
     }
 
     @Override

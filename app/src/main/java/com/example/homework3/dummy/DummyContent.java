@@ -1,7 +1,6 @@
 package com.example.homework3.dummy;
 
 import com.example.homework3.GlucoseData;
-import com.example.homework3.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
