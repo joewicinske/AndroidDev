@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +20,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * View Pager Addition . V1.1
@@ -65,6 +76,7 @@ public class AddModifyGlucoseActivity extends AppCompatActivity implements Gluco
         setSupportActionBar(mTopToolbar);
         getSupportActionBar().setTitle(deleteData ? deleteTitle : addTitle);
         initializeViews();
+
     }
 
     @Override
@@ -74,9 +86,29 @@ public class AddModifyGlucoseActivity extends AppCompatActivity implements Gluco
             Toast.makeText(this, "Item has been deleted", Toast.LENGTH_SHORT).show();
             getHistory();
         } else if (deleteData && item.getItemId() == R.id.upload){
-            Toast.makeText(this, "Item has been uploaded", Toast.LENGTH_SHORT).show();
+            uploadData(incomingGlucoseData);
         }
             return super.onOptionsItemSelected(item);
+    }
+
+    private void uploadData(GlucoseData incomingGlucoseData) {
+
+        Map<String, String> postData = new LinkedHashMap<>();
+        postData.put("breakfast", String.valueOf(incomingGlucoseData.getBreakfast()));
+        postData.put("lunch", String.valueOf(incomingGlucoseData.getLunch()));
+        postData.put("dinner", String.valueOf(incomingGlucoseData.getDinner()));
+        postData.put("message", String.valueOf(incomingGlucoseData.getNotes()));
+        postData.put("date", String.valueOf(incomingGlucoseData.getEntryDate()));
+        postData.put("fasting", String.valueOf(incomingGlucoseData.getFasting()));
+        postData.put("id", String.valueOf(incomingGlucoseData.getId()));
+        JSONObject jsonObject = new JSONObject(postData);
+        Map<String, String> outputValues = new LinkedHashMap<>();
+        outputValues.put("username", "josephwicinske");
+        outputValues.put("password", "a0820");
+        outputValues.put("data", jsonObject.toString());
+
+        AsyncNetworkTask networkTask = new AsyncNetworkTask(outputValues);
+        networkTask.execute("http://u.arizona.edu/~lxu/cscv381/local_glucose.php");
     }
 
     @Override
@@ -215,6 +247,7 @@ public class AddModifyGlucoseActivity extends AppCompatActivity implements Gluco
             dateLabel.setText(incomingGlucoseData.getEntryDate());
             normalCheckBox.setChecked(incomingGlucoseData.isNormal());
             submitButton.setVisibility(View.GONE);
+            historyButton.setOnClickListener(listener);
         }else {
             clearButton.setOnClickListener(listener);
             historyButton.setOnClickListener(listener);
@@ -303,19 +336,50 @@ public class AddModifyGlucoseActivity extends AppCompatActivity implements Gluco
             System.err.println("Item is nlull");
         }else{
             dbHelper.insertGlucose(item);
-            myFrag.updateList();
+           // myFrag.updateList();
             getHistory();
         }
 
     }
 
 
-    private class AsyncNetworkTask extends AsyncTask<GlucoseData, Void, String> {
+    private class AsyncNetworkTask extends AsyncTask<String, Void, Void> {
 
+        private Map<String, String> incomingData;
+        private boolean success = false;
+
+        public AsyncNetworkTask(Map<String, String> data){
+            this.incomingData = data;
+        }
         // url http://u.arizona.edu/~lxu/cscv381/local_glucose.php
         @Override
-        protected String doInBackground(GlucoseData... dataItem) {
-            GlucoseData item = dataItem [0];
+        protected Void doInBackground(String... params) {
+            try {
+                StringBuilder postData = new StringBuilder();
+                for (Map.Entry<String,String> param : incomingData.entrySet()) {
+                    if (postData.length() != 0) postData.append('&');
+                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                    postData.append('=');
+                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                }
+                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+
+
+                URL url = new URL(params[0]); // getting the url from the connection
+                // from url to http
+                HttpURLConnection urlConnection  = (HttpURLConnection)url.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                urlConnection.setRequestMethod("POST");
+                urlConnection.getOutputStream().write(postDataBytes);
+                int statusCode = urlConnection.getResponseCode();
+                if (statusCode == 200) success = true;
+            }catch(Exception e){
+                e.printStackTrace();
+            }
             return null;
         }
 
@@ -325,8 +389,14 @@ public class AddModifyGlucoseActivity extends AppCompatActivity implements Gluco
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (success){
+                Toast.makeText(AddModifyGlucoseActivity.this, "The request was made successfully! Go Check the " +
+                        "database.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(AddModifyGlucoseActivity.this, "Not successful", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

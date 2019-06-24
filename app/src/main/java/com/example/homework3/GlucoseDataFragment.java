@@ -68,6 +68,7 @@ public class GlucoseDataFragment extends Fragment {
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
         // Set the adapter
         context = view.getContext();
+        dbHelper = new DBHelper(context);
         glucoseData = dbHelper.getAllData();
         adapter = new CustomPageAdapter(context, glucoseData );
         viewPager.setAdapter(adapter);
@@ -75,6 +76,7 @@ public class GlucoseDataFragment extends Fragment {
     }
 
     public void updateList(){
+        if (dbHelper == null) dbHelper = new DBHelper(context);
         glucoseData = dbHelper.getAllData();
         Log.d(this.getClass().getSimpleName(),"List has been updated");
         if (adapter != null){
