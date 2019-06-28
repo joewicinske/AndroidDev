@@ -41,7 +41,11 @@ public class ListActivity extends AppCompatActivity implements MyGlucoseDataRecy
         if (item.getItemId() == R.id.add){
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
+        } else if (item.getItemId() == R.id.cloud){
+            Intent intent = new Intent(getApplicationContext(), WebActivity.class);
+            startActivity(intent);
         }
+
         return super.onOptionsItemSelected(item);
     }
 
