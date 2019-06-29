@@ -17,16 +17,14 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent notificationIntent = new Intent(context, MainActivity.class);
+        Intent notificationIntent = new Intent(context, AddModifyGlucoseActivity.class);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(AddModifyGlucoseActivity.class);
         stackBuilder.addNextIntent(notificationIntent);
 
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
         Notification.Builder builder = new Notification.Builder(context);
-
         Notification notification = builder.setContentTitle("Glucose Monitor")
                 .setContentText("Click to enter data for Glucose.")
                 .setTicker("Today's Glucose Data is Missing")
@@ -42,7 +40,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "NotificationDemo",
+                    "GlucoseApp",
                     IMPORTANCE_DEFAULT
             );
             notificationManager.createNotificationChannel(channel);

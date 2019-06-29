@@ -4,9 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -21,29 +19,27 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.homework3.dummy.DummyContent;
+import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Date;
-import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * View Pager Addition . V1.1
  */
-public class MainActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
+public class AddModifyGlucoseActivity extends AppCompatActivity implements GlucoseDataFragment.OnListFragmentInteractionListener {
 
     private EditText fastingInput, breakfastInput, lunchInput, dinnerInput, notesInput;
     private TextView resultsView, dateLabel;
     private Button clearButton, historyButton, submitButton;
     private CheckBox normalCheckBox;
     private DBHelper dbHelper;
-    private GlucoseDataFragment myFrag = new GlucoseDataFragment();
     private String[] notes = new String[] {"", "", "", ""};
     private DatePickerDialog.OnDateSetListener dateSetListener;
-    private String TAG = this.getClass().getSimpleName();
     private String addTitle = "Add Glucose Information";
     private String deleteTitle = "Delete Glucose Information";
     private Toolbar mTopToolbar;
@@ -82,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
             dbHelper.deleteGlucose(incomingGlucoseData.getId());
             Toast.makeText(this, "Item has been deleted", Toast.LENGTH_SHORT).show();
             getHistory();
+        } else if (deleteData && item.getItemId() == R.id.upload){
+            uploadData(incomingGlucoseData);
         }
             return super.onOptionsItemSelected(item);
     }
@@ -90,6 +88,26 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
     public boolean onCreateOptionsMenu(Menu menu) {
         if (deleteData) getMenuInflater().inflate(R.menu.menu_delete, menu);
         return true;
+    }
+
+    private void uploadData(GlucoseData incomingGlucoseData) {
+
+        Map<String, String> postData = new LinkedHashMap<>();
+        postData.put("breakfast", String.valueOf(incomingGlucoseData.getBreakfast()));
+        postData.put("lunch", String.valueOf(incomingGlucoseData.getLunch()));
+        postData.put("dinner", String.valueOf(incomingGlucoseData.getDinner()));
+        postData.put("message", String.valueOf(incomingGlucoseData.getNotes()));
+        postData.put("date", String.valueOf(incomingGlucoseData.getEntryDate()));
+        postData.put("fasting", String.valueOf(incomingGlucoseData.getFasting()));
+        postData.put("id", String.valueOf(incomingGlucoseData.getId()));
+        JSONObject jsonObject = new JSONObject(postData);
+        Map<String, String> outputValues = new LinkedHashMap<>();
+        outputValues.put("username", "josephwicinske");
+        outputValues.put("password", "a0820");
+        outputValues.put("data", jsonObject.toString());
+
+        AsyncNetworkTask networkTask = new AsyncNetworkTask(outputValues);
+        networkTask.execute("http://u.arizona.edu/~lxu/cscv381/local_glucose.php");
     }
 
     private void initializeViews() {
@@ -181,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
                 int month = cal.get(Calendar.MONTH);
 
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, android.R.style.Theme_Black, dateSetListener, year, month ,day);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(AddModifyGlucoseActivity.this, android.R.style.Theme_Black, dateSetListener, year, month ,day);
                 datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 datePickerDialog.show();
             }
@@ -261,6 +279,62 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         normalCheckBox.setChecked(glucoseData.isNormal());
     }
 
+    private class AsyncNetworkTask extends AsyncTask<String, Void, Void> {
+
+        private Map<String, String> incomingData;
+        private boolean success = false;
+
+        public AsyncNetworkTask(Map<String, String> data){
+            this.incomingData = data;
+        }
+        // url http://u.arizona.edu/~lxu/cscv381/local_glucose.php
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                StringBuilder postData = new StringBuilder();
+                for (Map.Entry<String,String> param : incomingData.entrySet()) {
+                    if (postData.length() != 0) postData.append('&');
+                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                    postData.append('=');
+                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                }
+                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+
+
+                URL url = new URL(params[0]); // getting the url from the connection
+                // from url to http
+                HttpURLConnection urlConnection  = (HttpURLConnection)url.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                urlConnection.setRequestMethod("POST");
+                urlConnection.getOutputStream().write(postDataBytes);
+                int statusCode = urlConnection.getResponseCode();
+                if (statusCode == 200) success = true;
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (success){
+                Toast.makeText(AddModifyGlucoseActivity.this, "The request was made successfully! Go Check the " +
+                        "database.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(AddModifyGlucoseActivity.this, "Not successful", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
     private void submitData() {
         String fastingText = fastingInput.getText().toString();
         String breakfastText = breakfastInput.getText().toString();
@@ -305,12 +379,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
         Intent intent = new Intent(getApplicationContext(), ListActivity.class);
         startActivity(intent);
     }
-    /**
-     * Accepts the edit text input and allows us to proceed to the next activity or fragment
-     */
-    private void processInput(){
-
-    }
 
     @Override
     public void onListFragmentInteraction(GlucoseData item) {
@@ -318,9 +386,6 @@ public class MainActivity extends AppCompatActivity implements GlucoseDataFragme
             System.err.println("Item is nlull");
         }else{
             dbHelper.insertGlucose(item);
-            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. Size is now " + dbHelper.getNumRows());
-            Log.d(TAG, "onListFragmentInteraction: Data was just inserted. List is now" + dbHelper.getAllData());
-            myFrag.updateList();
             getHistory();
         }
 

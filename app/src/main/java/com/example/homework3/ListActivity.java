@@ -9,11 +9,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,7 +64,7 @@ public class ListActivity extends AppCompatActivity implements MyGlucoseDataRecy
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.add){
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), AddModifyGlucoseActivity.class);
             startActivity(intent);
         } else if (item.getItemId() == R.id.cloud){
             Intent intent = new Intent(getApplicationContext(), WebActivity.class);
@@ -84,7 +82,7 @@ public class ListActivity extends AppCompatActivity implements MyGlucoseDataRecy
 
     @Override
     public void onItemClick(View view, int position) {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), AddModifyGlucoseActivity.class);
         GlucoseData glucoseItem = data.get(position);
         intent.putExtra("glucoseItem", glucoseItem);
         startActivity(intent);
