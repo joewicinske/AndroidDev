@@ -69,8 +69,19 @@ public class ListActivity extends AppCompatActivity implements MyGlucoseDataRecy
         } else if (item.getItemId() == R.id.cloud){
             Intent intent = new Intent(getApplicationContext(), WebActivity.class);
             startActivity(intent);
-        }
-
+        } else if (item.getItemId() == R.id.share){
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            String message = "";
+            for (GlucoseData glucoseData : data){
+                String summmary = glucoseData.toString();
+                message += String.format("This is my data for this day: %s, My overall results %s. \n\n", glucoseData.entryDate, summmary);
+            }
+            message +="What are your results? Can you share too? ";
+            sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
+    }
         return super.onOptionsItemSelected(item);
     }
 
@@ -87,4 +98,5 @@ public class ListActivity extends AppCompatActivity implements MyGlucoseDataRecy
         intent.putExtra("glucoseItem", glucoseItem);
         startActivity(intent);
     }
+
 }

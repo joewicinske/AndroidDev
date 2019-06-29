@@ -18,4 +18,12 @@
         app:showAsAction="always"
         android:orderInCategory="100"
         />
+
+
+    <item android:id="@+id/share"
+        android:title="ShareData"
+        android:icon="@drawable/ic_share_button"
+        app:showAsAction="always"
+        android:orderInCategory="100"
+        />
 </menu>
